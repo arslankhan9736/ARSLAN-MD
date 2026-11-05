@@ -64,3 +64,16 @@ Owner Name: MR ARSLAN
 Bot Name: ARSLAN MD
 Prefix: .
 Pairing: PAIR CODE
+⚠️ Important
+
+- `auth` folder kabhi GitHub pe mat daalna
+- Apna Pair Code kisi ko mat dena
+- Bot ko 24h chalane ke liye host ko ON rakho
+
+👑 Credits
+
+*Made By: MR ARSLAN*
+*Bot: ARSLAN MD*
+*WhatsApp: https://wa.me/923467214839*
+
+> ⭐ Repo ko Star dena mat bhoolna!
