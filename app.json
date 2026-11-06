@@ -1,0 +1,69 @@
+{
+  "name": "ARSLAN-MD",
+  "description": "ARSLAN MD - Powerful WhatsApp Bot By MR ARSLAN",
+  "repository": "https://github.com/MR-ARSLAN/ARSLAN-MD",
+  "logo": "https://files.catbox.moe/6zd0ru.jpg",
+  "keywords": ["whatsapp", "bot", "arslan-md", "baileys"],
+  "env": {
+    "SESSION_ID": {
+      "description": "Your Session ID from Pair Site",
+      "required": false,
+      "value": ""
+    },
+    "OWNER_NUMBER": {
+      "description": "Owner Number (Default: 923467214839)",
+      "required": false,
+      "value": "923467214839"
+    },
+    "BOT_NAME": {
+      "description": "Bot Name",
+      "required": false,
+      "value": "ARSLAN MD"
+    },
+    "OWNER_NAME": {
+      "description": "Owner Name",
+      "required": false,
+      "value": "MR ARSLAN"
+    },
+    "PREFIX": {
+      "description": "Bot Prefix (Default: .)",
+      "required": false,
+      "value": "."
+    },
+    "ANTI_DELETE": {
+      "description": "Anti delete: true/false (Default: true)",
+      "required": false,
+      "value": "true"
+    },
+    "ANTI_CALL": {
+      "description": "Anti call: true/false (Default: false)",
+      "required": false,
+      "value": "false"
+    },
+    "REJECT_MSG": {
+      "description": "Call reject message",
+      "required": false,
+      "value": "*📞 Call not allowed in this number you don't have permission 📵*"
+    },
+    "AUTO_STATUS_SEEN": {
+      "description": "Auto view status: true/false (Default: true)",
+      "required": false,
+      "value": "true"
+    },
+    "WELCOME": {
+      "description": "Welcome messages: true/false (Default: false)",
+      "required": false,
+      "value": "false"
+    },
+    "GOODBYE": {
+      "description": "Goodbye messages: true/false (Default: false)",
+      "required": false,
+      "value": "false"
+    },
+    "BOT_MEDIA_URL": {
+      "description": "Bot media URL",
+      "required": false,
+      "value": "https://i.ibb.co/cKGB1JpM/arslanmd.jpg"
+    }
+  }
+}
