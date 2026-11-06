@@ -45,7 +45,7 @@
 ---
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/MR-ARSLAN/ARSLAN-MD/refs/heads/main/arslanmd.jpg" width="300" style="border-radius: 20px; box-shadow: 0 0 20px #00ffff;"/>
+  <img src="https://raw.githubusercontent.com/MR-ARSLAN/ARSLAN-MD/main/arslanmd.jpg" width="300" style="border-radius: 20px; box-shadow: 0 0 20px #00ffff;"/>
 </div>
 
 ***
