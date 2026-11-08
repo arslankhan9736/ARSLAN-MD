@@ -1,5 +1,5 @@
-// api/pair.js - ESM VERSION (Teri package.json ke liye)
-import { makeWASocket, useMultiFileAuthState } from '@whiskeysockets/baileys'
+// api/pair.js - FIXED VERSION
+import { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion } from '@whiskeysockets/baileys'
 import pino from 'pino'
 
 export default async function handler(req, res) {
@@ -18,9 +18,15 @@ export default async function handler(req, res) {
     if (!number) return res.status(400).json({ error: 'Number chahiye' })
 
     const cleanNumber = number.replace(/[^0-9]/g, '')
-    const { state, saveCreds } = await useMultiFileAuthState(`auth_${cleanNumber}`)
+
+    // FIX 1: Version le liya
+    const { version } = await fetchLatestBaileysVersion()
+
+    // FIX 2: /tmp laga diya - Vercel pe sirf yahan likh sakte hain
+    const { state, saveCreds } = await useMultiFileAuthState(`/tmp/auth_${cleanNumber}`)
     
     const sock = makeWASocket({
+      version,
       auth: state,
       printQRInTerminal: false,
       logger: pino({ level: 'silent' }),
@@ -30,6 +36,9 @@ export default async function handler(req, res) {
 
     await new Promise(r => setTimeout(r, 2000))
     const code = await sock.requestPairingCode(cleanNumber)
+
+    // FIX 3: Socket band kar diya taake Vercel hang na ho
+    setTimeout(() => { try { sock.end() } catch(e){} }, 3000)
     
     return res.status(200).json({ code: code, success: true })
 
