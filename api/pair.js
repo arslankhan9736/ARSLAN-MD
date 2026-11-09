@@ -1,4 +1,5 @@
-import makeWASocket, { useMultiFileAuthState, DisconnectReason } from "@whiskeysockets/baileys";
+import pkg from "@whiskeysockets/baileys";
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = pkg;
 import pino from "pino";
 
 export default async function handler(req, res) {
@@ -27,32 +28,18 @@ export default async function handler(req, res) {
 
     sock.ev.on("creds.update", saveCreds);
 
-    sock.ev.on("connection.update", async (update) => {
-      const { connection, lastDisconnect } = update;
-      if (connection === "open") {
-        try { sock.end(); } catch {}
-        return res.status(200).json({ success: true, message: "Already paired!" });
-      }
-      if (connection === "close") {
-        const code = lastDisconnect?.error?.output?.statusCode;
-        if (code !== DisconnectReason.loggedOut) {
-          // retry nahi, bas band
-        }
-        try { sock.end(); } catch {}
-      }
-    });
-
-    // 2 second ruk ke code mangwao
     await new Promise((r) => setTimeout(r, 2000));
 
     if (!sock.authState.creds.registered) {
       const code = await sock.requestPairingCode(number);
+      try { sock.end(); } catch {}
       return res.status(200).json({ success: true, code: code });
     } else {
+      try { sock.end(); } catch {}
       return res.status(200).json({ success: true, message: "Already registered" });
     }
   } catch (e) {
     console.log(e);
     return res.status(500).json({ error: e.message || "Pair fail ho gaya, phir try karo" });
   }
-    }
+}
