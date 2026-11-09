@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARSLAN MD MINI</title>
+<style>
+body{background:#0d0d0d;color:white;font-family:sans-serif;text-align:center;padding:20px}
+.box{background:#1a1a1a;border:2px solid #a100ff;border-radius:15px;padding:25px;max-width:400px;margin:30px auto;box-shadow:0 0 20px #a100ff55}
+h1{color:#a100ff}
+input{width:90%;padding:15px;border-radius:10px;border:1px solid #333;background:#000;color:white;font-size:18px;text-align:center;outline:none}
+button{background:#a100ff;color:white;border:none;padding:15px 30px;border-radius:10px;font-size:18px;font-weight:bold;cursor:pointer;width:95%;margin-top:15px}
+#result{margin-top:20px;font-size:28px;letter-spacing:5px;color:#00ff88;font-weight:bold;display:none}
+#msg{margin-top:10px;color:#ffaaaa}
+</style>
+</head>
+<body>
+<h1>💜 ARSLAN MD MINI</h1>
+<div class="box">
+<h2>🚀 START ARSLAN MD</h2>
+<p>Number Daalo - 92 ke saath, + ke bagair</p>
+<input id="num" type="tel" placeholder="923467214839">
+<button id="btn" onclick="getCode()">GET PAIRING CODE</button>
+<div id="msg"></div>
+<div id="result"></div>
+<button id="copyBtn" style="display:none;background:#00aa55" onclick="copyCode()">COPY CODE</button>
+</div>
+<script>
+let myCode="";
+async function getCode(){
+  const num=document.getElementById('num').value.trim();
+  const btn=document.getElementById('btn');
+  const msg=document.getElementById('msg');
+  const result=document.getElementById('result');
+  if(!num||num.length<10){msg.innerText="❌ Sahi number daalo meri jaan!";return;}
+  btn.disabled=true;btn.innerText="⏳ CODE BAN RAHA HAI...";
+  msg.innerText="Thora ruk ja meri jaan...";
+  try{
+    const res=await fetch('/api/pair',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({number:num})});
+    const data=await res.json();
+    if(data.code){myCode=data.code;result.innerText=data.code;result.style.display="block";document.getElementById('copyBtn').style.display="block";msg.innerText="✅ Ho gaya! WhatsApp me ja ke daal de!";}
+    else{msg.innerText="❌ Error: "+(data.error||"Phir try kar");}
+  }catch(e){msg.innerText="❌ Server se connect nahi hua";}
+  btn.disabled=false;btn.innerText="GET PAIRING CODE";
+}
+function copyCode(){navigator.clipboard.writeText(myCode);alert("Copy ho gaya meri jaan!");}
+</script>
+</body>
+  </html>
