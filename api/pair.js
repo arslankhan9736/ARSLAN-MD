@@ -25,32 +25,40 @@ export default async function handler(req, res) {
       browser: ["Chrome", "Chrome", "1.0"],
       markOnlineOnConnect: false,
       syncFullHistory: false,
-      connectTimeoutMs: 60000,
-      keepAliveIntervalMs: 10000,
     });
     sock.ev.on("creds.update", saveCreds);
 
-    // IMPORTANT: Open ka wait NAHI karna, seedha code mangna hai
     await new Promise(r => setTimeout(r, 1500));
-
-    if (sock.authState.creds.registered) {
-      try { sock.end(); } catch {}
-      return res.status(200).json({ success: true, message: "Already registered" });
-    }
-
     const code = await sock.requestPairingCode(number);
 
-    // Code mil gaya, ab 5 sec baad socket band karo taake creds save ho jayen
-    setTimeout(() => { try { sock.end(); } catch {} }, 5000);
+    // Code mil gaya, ab socket ko zinda rakho taake user code daal sake
+    // Hum 55 second tak wait karenge ke user link kare
+    const linked = await new Promise((resolve) => {
+      const timeout = setTimeout(() => resolve(false), 55000);
+      sock.ev.on("connection.update", (u) => {
+        if (u.connection === "open") {
+          clearTimeout(timeout);
+          resolve(true);
+        }
+      });
+      sock.ev.on("creds.update", () => {
+        if (sock.authState.creds.registered) {
+          // thora wait karo, connection open hone do
+        }
+      });
+    });
 
-    return res.status(200).json({ success: true, code: code });
+    try { sock.end(); } catch {}
+
+    if (linked) {
+      return res.status(200).json({ success: true, code: code, message: "Linked ho gaya!" });
+    } else {
+      // Agar 55 sec me link nahi hua, to bhi code de do, user dobara try karega
+      return res.status(200).json({ success: true, code: code, message: "Code mil gaya, jaldi link karo" });
+    }
 
   } catch (e) {
     console.log("PAIR ERROR:", e);
-    // Ye wala error aksar is liye aata hai ke number pe pehle se request gayi hui hai
-    if (String(e.message).includes("Connection Closed")) {
-      return res.status(500).json({ error: "WhatsApp ne connection band kar diya, 2 min ruk ke phir try karo meri jaan" });
-    }
     return res.status(500).json({ error: e.message || "Phir try karo" });
   }
-}
+    }
