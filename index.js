@@ -19,16 +19,27 @@ async function startBot() {
   });
   sock.ev.on('creds.update', saveCreds);
 
-  if (!sock.authState.creds.registered) {
-    const number = process.env.PAIR_NUMBER || config.ownerNumber;
+    if (!sock.authState.creds.registered) {
+    const readline = require("readline");
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    const question = (text) => new Promise((resolve) => rl.question(text, resolve));
+
+    let phoneNumber = process.env.PAIR_NUMBER;
+    if (!phoneNumber) {
+      phoneNumber = await question('📱 اپنا واٹس ایپ نمبر لکھیں (مثلاً 923123456789): ');
+      phoneNumber = phoneNumber.replace(/[^0-9]/g, '');
+    }
+    rl.close();
+
     console.log("⏳ Pairing Code ban raha hai...");
     setTimeout(async () => {
       try {
-        const code = await sock.requestPairingCode(number);
+        const code = await sock.requestPairingCode(phoneNumber);
         console.log("✅ TERA PAIRING CODE: " + code);
       } catch(e){ console.log("❌ Pairing Error:", e.message); }
     }, 3000);
   }
+
 
   sock.ev.on('connection.update', (update) => {
     const { connection, lastDisconnect } = update;
