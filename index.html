@@ -1,33 +1,135 @@
 <!DOCTYPE html>
-<html>
-<head><title>ARSLAN-MD MINI</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body{background:#0f0f0f;color:#fff;font-family:sans-serif;text-align:center;padding:30px}
-input{padding:12px;width:80%;border-radius:10px;border:none;font-size:18px;text-align:center}
-button{padding:12px 25px;margin-top:15px;background:#25D366;color:#fff;border:none;border-radius:10px;font-size:18px}
-#code{font-size:35px;letter-spacing:5px;color:#25D366;margin-top:20px;font-weight:bold}
-</style></head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARSLAN MD - PAIR CODE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: rgba(25, 20, 50, 0.85);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid rgba(124, 58, 237, 0.3);
+        }
+        hh1, h2 {
+            margin-bottom: 10px;
+            color: #a78bfa;
+        }
+        p {
+            font-size: 14px;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        label {
+            font-size: 13px;
+            color: #c4b5fd;
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #4c1d95;
+            background: #1e1b4b;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+        }
+        input:focus {
+            border-color: #7c3ahead;
+            box-shadow: 0 0 8px rgba(124, 58, 237, 0.5);
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        #code-box {
+            margin-top: 20px;
+            background: #1e1b4b;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px dashed #7c3aed;
+            display: none;
+            word-break: break-all;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
 <body>
-<h1>ARSLAN-MD 💜 MINI</h1>
-<p>Apna number likho 923xx</p>
-<input id="num" placeholder="923467214839" />
-<br><button onclick="getCode()">GET PAIRING CODE</button>
-<div id="code"></div>
-<p id="msg"></p>
-<script>
-async function getCode(){
-  const number = document.getElementById("num").value;
-  document.getElementById("msg").innerText = "Ruko... code aa raha hai...";
-  const res = await fetch("/api/pair", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({number})});
-  const data = await res.json();
-  if(data.code){
-    document.getElementById("code").innerText = data.code;
-    document.getElementById("msg").innerText = "Ab WhatsApp me ja ke ye code daal do, 30 sec ke andar!";
-  } else {
-    document.getElementById("msg").innerText = "Error: " + (data.error || "Phir try karo");
-  }
-}
-</script>
+
+    <div class="container">
+        <h2>💜 ARSLAN MD 💜</h2>
+        <p>Get your WhatsApp Pairing Code easily below!</p>
+        
+        <div class="input-group">
+            <label for="phone">Enter WhatsApp Number with Country Code:</label>
+            <input type="text" id="phone" placeholder="923467214839">
+        </div>
+        
+        <button onclick="getPairCode()">Generate Code</button>
+
+        <div id="code-box">
+            <h3 style="color: #4ade80; font-size: 14px; margin-bottom: 5px;">Your Pairing Code:</h3>
+            <span id="display-code" style="font-size: 20px; font-weight: bold; color: #fff;"></span>
+        </div>
+
+        <div class="footer">
+            <p>© POWERED BY MR ARSLAN</p>
+        </div>
+    </div>
+
+    <script>
+        async function getPairCode() {
+            const phone = document.getElementById('phone').value.trim();
+            if(!phone) {
+                alert("Please enter your WhatsApp number!");
+                return;
+            }
+            
+            alert("Requesting pairing code for: " + phone);
+            // یہان آپ اپنے بیک اینڈ (Backend/Server.js) کی API کال جوڑ سکتے ہیں
+        }
+    </script>
+
 </body>
 </html>
