@@ -30,7 +30,7 @@
             text-align: center;
             border: 1px solid rgba(124, 58, 237, 0.3);
         }
-        hh1, h2 {
+        h2 {
             margin-bottom: 10px;
             color: #a78bfa;
         }
@@ -60,7 +60,7 @@
             outline: none;
         }
         input:focus {
-            border-color: #7c3ahead;
+            border-color: #7c3aed;
             box-shadow: 0 0 8px rgba(124, 58, 237, 0.5);
         }
         button {
@@ -82,11 +82,10 @@
         #code-box {
             margin-top: 20px;
             background: #1e1b4b;
-            padding: 10px;
+            padding: 15px;
             border-radius: 8px;
             border: 1px dashed #7c3aed;
             display: none;
-            word-break: break-all;
         }
         .footer {
             margin-top: 20px;
@@ -106,11 +105,11 @@
             <input type="text" id="phone" placeholder="923467214839">
         </div>
         
-        <button onclick="getPairCode()">Generate Code</button>
+        <button id="submit-btn" onclick="getPairCode()">Generate Code</button>
 
         <div id="code-box">
             <h3 style="color: #4ade80; font-size: 14px; margin-bottom: 5px;">Your Pairing Code:</h3>
-            <span id="display-code" style="font-size: 20px; font-weight: bold; color: #fff;"></span>
+            <span id="display-code" style="font-size: 24px; font-weight: bold; color: #fff; letter-spacing: 2px;"></span>
         </div>
 
         <div class="footer">
@@ -120,14 +119,42 @@
 
     <script>
         async function getPairCode() {
-            const phone = document.getElementById('phone').value.trim();
+            const phoneInput = document.getElementById('phone');
+            const codeBox = document.getElementById('code-box');
+            const displayCode = document.getElementById('display-code');
+            const btn = document.getElementById('submit-btn');
+
+            const phone = phoneInput.value.trim();
             if(!phone) {
                 alert("Please enter your WhatsApp number!");
                 return;
             }
-            
-            alert("Requesting pairing code for: " + phone);
-            // یہان آپ اپنے بیک اینڈ (Backend/Server.js) کی API کال جوڑ سکتے ہیں
+
+            btn.innerText = "Generating Code...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/pair', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ number: phone })
+                });
+
+                const data = await response.json();
+                if(data.success) {
+                    displayCode.innerText = data.code;
+                    codeBox.style.display = "block";
+                    btn.innerText = "Success! ✨";
+                } else {
+                    alert("Error: " + (data.error || "Failed to generate code"));
+                    btn.innerText = "Generate Code";
+                    btn.disabled = false;
+                }
+            } catch(e) {
+                alert("Network error occurred!");
+                btn.innerText = "Generate Code";
+                btn.disabled = false;
+            }
         }
     </script>
 
