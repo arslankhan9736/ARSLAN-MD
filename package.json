@@ -1,4 +1,3 @@
-cat > package.json << 'EOF'
 {
   "name": "ARSLAN-MD",
   "version": "15.0.0",
@@ -30,4 +29,3 @@ cat > package.json << 'EOF'
     "jimp": "^0.22.12"
   }
 }
-EOF
