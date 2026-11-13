@@ -92,17 +92,14 @@
 
 > Securely link your device using the official ARSLAN-MD pairing portals below: if connection issues may require vpn activation to fix this issue.
 
- <div align="center">
-
-### 🌊 GET SESSION ID
-<p align="center">
-  <a href="https://arslanmd-pair.onrender.com">
-    <img src="https://img.shields.io/badge/💫_ARSLAN_MD_PAIR_CODE-7C3AED?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=1e1b4b" alt="ARSLAN MD Session"/>
+ <p align="center">
+  <a href="YOUR_SESSION_GENERATOR_URL_HERE">
+    <img src="https://img.shields.io/badge/GET_SESSION_ID-100%25?style=for-the-badge&logo=whatsapp&logoColor=white&color=success" alt="Get Session ID"/>
   </a>
 </p>
-
-
 </div>
+### 🔗 Get Your Session ID
+[![Pair Code](https://img.shields.io/badge/Click%20Here-Pair%20Device-blue?style=for-the-badge&logo=qrcode)](YOUR_SESSION_GENERATOR_URL_HERE)
 
 ---
 
