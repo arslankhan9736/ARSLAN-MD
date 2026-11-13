@@ -98,8 +98,7 @@
   </a>
 </p>
 </div>
-### 🔗 Get Your Session ID
-[![Pair Code](https://img.shields.io/badge/Click%20Here-Pair%20Device-blue?style=for-the-badge&logo=qrcode)](YOUR_SESSION_GENERATOR_URL_HERE)
+
 
 ---
 
