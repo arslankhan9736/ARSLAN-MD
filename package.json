@@ -1,7 +1,7 @@
 {
   "name": "arslan-md",
   "version": "2.5.0",
-  "description": "ARSLAN-MD WhatsApp Bot with Session ID and Pairing support",
+  "description": "ARSLAN-MD WhatsApp Bot",
   "main": "index.js",
   "type": "module",
   "scripts": {
