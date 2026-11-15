@@ -1,4 +1,4 @@
-Import { default as makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason } from '@whiskeysockets/baileys';
+import { default as makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason } from '@whiskeysockets/baileys';
 import pino from 'pino';
 import fs from 'fs';
 import readline from 'readline';
@@ -130,5 +130,3 @@ async function startBot() {
     }
   });
 }
-
-Ya,sai ha ?
