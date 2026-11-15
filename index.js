@@ -1,162 +1,40 @@
-import { default as makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } from '@whiskeysockets/baileys';
+Import { default as makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason } from '@whiskeysockets/baileys';
 import pino from 'pino';
 import fs from 'fs';
-import path from 'path';
+import readline from 'readline';
 import express from 'express';
 import config from './config.js';
 
 const app = express();
-app.use(express.json());
+app.get('/', (req, res) => res.send("💜 ARSLAN-MD IS RUNNING SUCCESSFULLY 💜"));
+app.listen(process.env.PORT || 3000, () => console.log("🌐 Web server is active on port 3000"));
 
-// ==========================================
-// 1. WEB PAIRING ROUTE & FRONTEND (Vercel & Render Compatible)
-// ==========================================
-app.get('/pair', async (req, res) => {
-    let num = req.query.num;
-    if (!num) {
-        return res.json({ error: "Phone number is required!" });
-    }
-    num = num.replace(/[^0-9]/g, '');
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+const question = (text) => new Promise((resolve) => rl.question(text, resolve));
 
-    const sessionPath = path.join('/tmp', 'session_' + Date.now());
-
-    try {
-        const { version } = await fetchLatestBaileysVersion();
-        const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
-
-        const sock = makeWASocket({
-            version,
-            auth: state,
-            printQRInTerminal: false,
-            logger: pino({ level: 'silent' }),
-            browser: [config.BOT_NAME, "Chrome", "2.5.0"]
-        });
-
-        sock.ev.on('creds.update', saveCreds);
-
-        if (!sock.authState.creds.registered) {
-            setTimeout(async () => {
-                try {
-                    let code = await sock.requestPairingCode(num);
-                    let formattedCode = code?.match(/.{1,4}/g)?.join('-') || code;
-                    return res.json({ status: true, code: formattedCode });
-                } catch (err) {
-                    return res.json({ error: "Failed to get pairing code." });
-                }
-            }, 3000);
-        }
-
-        sock.ev.on('connection.update', async (update) => {
-            const { connection } = update;
-            if (connection === 'open') {
-                try {
-                    const credsPath = path.join(sessionPath, 'creds.json');
-                    if (fs.existsSync(credsPath)) {
-                        const credsData = fs.readFileSync(credsPath, 'utf8');
-                        const base64Session = Buffer.from(credsData).toString('base64');
-                        
-                        // Owner ko WhatsApp par Session ID send karna
-                        const ownerJid = config.OWNER_NUMBER + "@s.whatsapp.net";
-                        await sock.sendMessage(ownerJid, { 
-                            text: `💜 *${config.BOT_NAME} NEW SESSION ID* 💜\n\n\`\`\`${base64Session}\`\`\`` 
-                        });
-                    }
-                } catch (e) {
-                    console.log("Error sending session to WhatsApp:", e);
-                }
-
-                setTimeout(() => {
-                    try {
-                        fs.rmSync(sessionPath, { recursive: true, force: true });
-                    } catch (err) {}
-                }, 10000);
-            }
-        });
-
-    } catch (err) {
-        return res.json({ error: "Server Error!" });
-    }
-});
-
-// Homepage UI with Get Session ID & Pairing Button
-app.get('/', (req, res) => {
-    res.send(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>${config.BOT_NAME} - SESSION & PAIRING</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <style>
-                body { background: #0d0d0d; color: #fff; font-family: sans-serif; text-align: center; padding-top: 40px; }
-                .card { background: #1a1a1a; padding: 25px; border-radius: 12px; display: inline-block; box-shadow: 0 0 20px rgba(255,7,58,0.4); max-width: 420px; width: 90%; }
-                input { padding: 12px; width: 80%; border-radius: 6px; border: none; text-align: center; font-size: 16px; margin-bottom: 10px; }
-                button { padding: 12px 25px; background: #ff073a; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 85%; }
-                button:hover { background: #d90429; }
-                #code { margin-top: 20px; font-size: 20px; color: #00ff66; word-break: break-all; }
-            </style>
-        </head>
-        <body>
-            <div class="card">
-                <h2 style="color: #ff073a;">💜 ${config.BOT_NAME} 💜</h2>
-                <p>Enter your WhatsApp number with country code:</p>
-                <input type="text" id="phone" placeholder="${config.OWNER_NUMBER}"><br>
-                <button onclick="getPair()">Get Pairing Code & Session</button>
-                <div id="code"></div>
-            </div>
-            <script>
-                async function getPair() {
-                    let num = document.getElementById('phone').value;
-                    if(!num) return alert('Please enter your WhatsApp number!');
-                    let codeDiv = document.getElementById('code');
-                    codeDiv.innerText = '⏳ Generating Pairing Code... Please wait...';
-                    
-                    try {
-                        let res = await fetch('/pair?num=' + num);
-                        let data = await res.json();
-                        if(data.code) {
-                            codeDiv.innerHTML = \`
-                                <p>PAIRING CODE:</p>
-                                <span style="color:yellow; font-size: 26px; font-weight: bold;">\${data.code}</span>
-                                <p style="font-size: 13px; color: #aaa; margin-top: 10px;">Link this code in WhatsApp (Linked Devices > Link with phone number).</p>
-                                <p style="font-size: 13px; color: #00ff66;">⚡ Once connected, your <b>SESSION_ID</b> will be sent directly to your WhatsApp chat!</p>
-                            \`;
-                        } else {
-                            codeDiv.innerHTML = '<span style="color: red;">Error: ' + (data.error || 'Failed to generate code') + '</span>';
-                        }
-                    } catch(e) {
-                        codeDiv.innerHTML = '<span style="color: red;">Server connection error!</span>';
-                    }
-                }
-            </script>
-        </body>
-        </html>
-    `);
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🌐 Server running on port ${PORT}`));
-
-
-// ==========================================
-// 2. MAIN BOT CORE LOGIC & COMMAND HANDLER
-// ==========================================
 async function startBot() {
+  console.log(`\n========================================`);
+  console.log(`💜 STARTING ${config.BOT_NAME} BY ${config.OWNER_NAME} 💜`);
+  console.log(`========================================\n`);
+
   const { version } = await fetchLatestBaileysVersion();
   const { state, saveCreds } = await useMultiFileAuthState('./session');
 
-  // Load session from SESSION_ID if provided in environment variables
+  // Agar SESSION_ID di gayi hai environment variable mein, toh usko session file mein likh dein
   if (config.SESSION_ID && !fs.existsSync('./session/creds.json')) {
     try {
       console.log("📥 Loading session from SESSION_ID...");
       let sessData = config.SESSION_ID;
+      // Agar session ID base64 ya custom format mein ho toh handle karein
       fs.writeFileSync('./session/creds.json', JSON.stringify(JSON.parse(Buffer.from(sessData, 'base64').toString('utf8'))));
       console.log("✅ Session Loaded Successfully!");
     } catch (e) {
+      // Direct JSON string check
       try {
         fs.writeFileSync('./session/creds.json', config.SESSION_ID);
         console.log("✅ Session Loaded Successfully!");
       } catch (err) {
-        console.log("⚠️ Invalid SESSION_ID format.");
+        console.log("⚠️ Invalid SESSION_ID format, proceeding with normal auth.");
       }
     }
   }
@@ -171,6 +49,29 @@ async function startBot() {
 
   sock.ev.on('creds.update', saveCreds);
 
+  // Agar registered nahi hai aur SESSION_ID bhi nahi hai toh Pairing Code maangay ga
+  if (!sock.authState.creds.registered) {
+    let num = config.OWNER_NUMBER;
+    if (!num) {
+      num = await question(`📱 Enter WhatsApp Number (e.g. 923467214839): `);
+      num = num.replace(/[^0-9]/g, '');
+    }
+    
+    if (num) {
+      try {
+        console.log("⏳ Generating Pairing Code...");
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        const code = await sock.requestPairingCode(num);
+        const formattedCode = code?.match(/.{1,4}/g)?.join('-') || code;
+        console.log(`\n----------------------------------------`);
+        console.log(`💜 ${config.BOT_NAME} PAIRING CODE: \x1b[1m\x1b[32m${formattedCode}\x1b[0m`);
+        console.log(`----------------------------------------\n`);
+      } catch (err) {
+        console.log("❌ Error generating pairing code:", err);
+      }
+    }
+  }
+
   sock.ev.on('connection.update', (update) => {
     const { connection, lastDisconnect } = update;
     if (connection === 'close') {
@@ -179,14 +80,14 @@ async function startBot() {
         console.log("🔄 Connection lost, reconnecting...");
         startBot();
       } else {
-        console.log("❌ Session logged out.");
+        console.log("❌ Session logged out. Please restart with a new session.");
       }
     } else if (connection === 'open') {
       console.log(`✅ ${config.BOT_NAME} SUCCESSFULLY CONNECTED TO WHATSAPP 💜`);
     }
   });
 
-  // Commands Handler
+  // Top-Tier Menu & Commands Handler
   sock.ev.on('messages.upsert', async ({ messages }) => {
     const m = messages[0]; 
     if (!m.message || m.key.fromMe) return;
@@ -204,13 +105,13 @@ async function startBot() {
       menu += `┃ 👑 Owner: ${config.OWNER_NAME}\n`;
       menu += `┃ ⚡ Prefix: [ ${config.PREFIX} ]\n`;
       menu += `┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
-      menu += `✨ *COMMANDS:* ✨\n`;
-      if (config.COMMANDS && Array.isArray(config.COMMANDS)) {
-        config.COMMANDS.forEach(c => {
-          menu += `> *${config.PREFIX}${c.name}* - ${c.desc}\n`;
-        });
-      }
-      menu += `\n_Powered by ${config.OWNER_NAME}_ 💜`;
+      menu += `✨ *AVAILABLE COMMANDS:* ✨\n\n`;
+      menu += `> *${config.PREFIX}menu* - Displays this gorgeous menu\n`;
+      menu += `> *${config.PREFIX}ping* - Check bot speed/status\n`;
+      menu += `> *${config.PREFIX}owner* - Get owner contact info\n`;
+      menu += `> *${config.PREFIX}sticker* - Convert image to sticker\n`;
+      menu += `> *${config.PREFIX}runtime* - Check bot active time\n\n`;
+      menu += `_Powered by ${config.OWNER_NAME}_ 💜`;
       
       await sock.sendMessage(from, { text: menu });
     } 
@@ -230,6 +131,4 @@ async function startBot() {
   });
 }
 
-startBot();
-
-export default app;
+Ya,sai ha ?
