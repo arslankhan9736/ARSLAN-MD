@@ -8,12 +8,11 @@
     "arslan-md",
     "nodejs"
   ],
-  "repository": "https://github.com/ARSLAN-KHAN/ARSLAN-MD",
-  "stack": "container",
+  "repository": "https://github.com/arslankhan9736/ARSLAN-MD",
   "env": {
     "SESSION_ID": {
       "description": "Apna WhatsApp Session ID yahan paste karein",
-      "required": true
+      "required": false
     },
     "OWNER_NUMBER": {
       "description": "Owner ka WhatsApp number country code ke sath",
@@ -33,6 +32,21 @@
     "MODE": {
       "description": "Bot mode: public ya self",
       "value": "public",
+      "required": false
+    },
+    "AUTO_STATUS_VIEW": {
+      "description": "Auto Status View: true rakhne par status automatically view honge",
+      "value": "true",
+      "required": false
+    },
+    "AUTO_READ": {
+      "description": "Auto Read Messages: true ya false",
+      "value": "false",
+      "required": false
+    },
+    "ANTISPAM": {
+      "description": "Anti Spam Protection: true ya false",
+      "value": "true",
       "required": false
     }
   },
