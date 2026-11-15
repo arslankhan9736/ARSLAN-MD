@@ -1,0 +1,44 @@
+{
+  "name": "ARSLAN-MD",
+  "description": "ARSLAN-MD Multi-Device WhatsApp Bot by MR ARSLAN",
+  "logo": "https://img.shields.io/badge/ARSLAN-MD-ff073a?style=for-the-badge",
+  "keywords": [
+    "whatsapp-bot",
+    "baileys",
+    "arslan-md",
+    "nodejs"
+  ],
+  "repository": "https://github.com/ARSLAN-KHAN/ARSLAN-MD",
+  "stack": "container",
+  "env": {
+    "SESSION_ID": {
+      "description": "Apna WhatsApp Session ID yahan paste karein",
+      "required": true
+    },
+    "OWNER_NUMBER": {
+      "description": "Owner ka WhatsApp number country code ke sath",
+      "value": "923467214839",
+      "required": true
+    },
+    "OWNER_NAME": {
+      "description": "Bot Owner ka naam",
+      "value": "MR ARSLAN",
+      "required": true
+    },
+    "PREFIX": {
+      "description": "Bot commands ka prefix sign",
+      "value": ".",
+      "required": true
+    },
+    "MODE": {
+      "description": "Bot mode: public ya self",
+      "value": "public",
+      "required": false
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}
