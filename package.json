@@ -1,0 +1,15 @@
+{
+  "name": "arslan-md",
+  "version": "2.5.0",
+  "description": "ARSLAN-MD WhatsApp Bot with Session ID and Pairing support",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.8",
+    "express": "^4.19.2",
+    "pino": "^9.0.0"
+  }
+}
